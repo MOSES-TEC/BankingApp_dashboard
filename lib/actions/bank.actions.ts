@@ -107,7 +107,7 @@ export const getAccount = async ({ appwriteItemId }: getAccountProps) => {
     };
 
     // sort transactions by date such that the most recent transaction is first
-      const allTransactions = [...transactions, ...transferTransactions].sort(
+      const allTransactions = [...transactions || [], ...transferTransactions].sort(
       (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
     );
 
@@ -143,8 +143,8 @@ export const getTransactions = async ({
   accessToken,
 }: getTransactionsProps) => {
   let hasMore = true;
-  // let transactions: any = [];
-  let transactions: unknown = [];
+  let transactions: any = [];
+  // let transactions: unknown = [];
 
   try {
     // Iterate through each page of new transaction updates for item
@@ -155,7 +155,7 @@ export const getTransactions = async ({
 
       const data = response.data;
 
-      transactions = response.data.added.map((transaction) => ({
+      const addedTransactions = (data.added || []).map((transaction) => ({
         id: transaction.transaction_id,
         name: transaction.name,
         paymentChannel: transaction.payment_channel,
@@ -168,6 +168,7 @@ export const getTransactions = async ({
         image: transaction.logo_url,
       }));
 
+      transactions = transactions.concat(addedTransactions);
       hasMore = data.has_more;
     }
 
